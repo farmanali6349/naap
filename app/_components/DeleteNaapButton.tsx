@@ -5,6 +5,8 @@ import { deleteNaap as deleteNaapFromDb } from "@/lib/firebase/db";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../_contexts/Auth";
+import { toast } from "sonner";
 
 export default function DeleteNaapButton({
   naapId,
@@ -17,6 +19,7 @@ export default function DeleteNaapButton({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   // Delete Images Of The Naap From Cloudinary
 
@@ -24,35 +27,34 @@ export default function DeleteNaapButton({
   const deleteNaap = async () => {
     setLoading(true);
 
-    const isDeleted = await deleteNaapFromDb(naapId);
+    if (user?.uid) {
+      const isDeleted = await deleteNaapFromDb(user.uid, naapId);
+      if (isDeleted) {
+        toast.success("Naap Deleted Successfully");
+        // Delete Naap Images From Cloudinary
+        if (imageIds.length > 0) {
+          const res = await axios.post("/api/delete-images", { ids: imageIds });
+          const { success, message } = res.data as {
+            success: boolean;
+            message: string;
+          };
 
-    if (isDeleted) {
-      console.log("Naap is deleted successfully from DB");
-
-      // Delete Naap Images From Cloudinary
-      if (imageIds.length > 0) {
-        const res = await axios.post("/api/delete-images", { ids: imageIds });
-        const { success, message } = res.data as {
-          success: boolean;
-          message: string;
-        };
-
-        if (success) {
-          console.log("Images Deleted Successfully");
-        } else {
-          // TODO: Add Toast Alert
-          console.log("Error deleting images :: ", message);
+          if (success) {
+            console.log("Images Deleted Successfully");
+          } else {
+            toast.error("Error Deleting This Naap Images : " + message);
+          }
         }
-      }
 
-      setLoading(false);
-      if (setOpen) {
-        setOpen(false);
-      }
+        setLoading(false);
+        if (setOpen) {
+          setOpen(false);
+        }
 
-      router.push("/");
-    } else {
-      console.log("Error deleting this naap");
+        router.push("/");
+      } else {
+        toast.error("Error Deleting This Naap");
+      }
     }
   };
   return (

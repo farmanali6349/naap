@@ -3,7 +3,7 @@ import NaapPageImagesLoader from "./NaapPageImagesLoader";
 
 export default function NaapPageLoader() {
   return (
-    <div className="max-w-lg px-4 my-4 w-full mt-6">
+    <div className="max-w-lg px-4 my-4 w-full mt-6 mx-auto">
       {/* Back Button */}
       <Skeleton className="h-10 w-20" />
 

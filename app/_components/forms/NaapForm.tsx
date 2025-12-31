@@ -82,8 +82,8 @@ export default function NaapForm({
   };
 
   const updateCurrNaap = async (data: NaapFormData) => {
-    if (defaultData && confirmChanges(data)) {
-      const isUpdated = await updateNaap(defaultData.naapId, data);
+    if (defaultData && confirmChanges(data) && user?.uid) {
+      const isUpdated = await updateNaap(user.uid, defaultData.naapId, data);
       if (isUpdated && setNaap && user) {
         setNaap({
           ...data,

@@ -72,12 +72,13 @@ export const createImages = async (
 // Update Naap
 // Response: Complete Updated Naap
 export const updateNaap = async (
+  userId: string,
   naapId: string,
   data: { name?: string; phone?: string; notes?: string }
 ) => {
   try {
     const naapRef = doc(db, "naaps", naapId);
-    await updateDoc(naapRef, data);
+    await updateDoc(naapRef, { ...data, userId });
     return true;
   } catch (error) {
     console.log("Error occured in updating naap :: ", error);
@@ -97,13 +98,17 @@ export const deleteImage = async (imageId: string) => {
 };
 
 // Delete Full Naap (Naap Document & Related Images)
-export const deleteNaap = async (naapId: string) => {
+export const deleteNaap = async (userId: string, naapId: string) => {
   try {
     // Creating Batch
     const batch = writeBatch(db);
 
     // Find all images belonging to this Naap
-    const q = query(collection(db, "images"), where("naapId", "==", naapId));
+    const q = query(
+      collection(db, "images"),
+      where("userId", "==", userId),
+      where("naapId", "==", naapId)
+    );
     const imageDocs = await getDocs(q);
 
     // Adding Images Deletion To Batch
@@ -147,12 +152,13 @@ export const getAllNaaps = async (userId: string) => {
 };
 
 // Get All Images
-export const getAllImages = async (naapId: string) => {
+export const getAllImages = async (userId: string, naapId: string) => {
   try {
     const imagesRefs = collection(db, "images");
 
     const q = query(
       imagesRefs,
+      where("userId", "==", userId),
       where("naapId", "==", naapId),
       orderBy("createdAt", "asc")
     );

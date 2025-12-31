@@ -21,6 +21,7 @@ import { deleteImage as deleteImageFromDb } from "@/lib/firebase/db";
 import axios from "axios";
 import { APIResponse } from "@/lib/types";
 import EmptyNaapPage from "@/app/_components/empty-content/EmptyNaapPage";
+import { useAuth } from "@/app/_contexts/Auth";
 /**
  *
  * Components
@@ -36,6 +37,7 @@ export default function NapPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingImages, setIsLoadingImages] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const { user } = useAuth();
 
   const loadImages = async (updatedImages: ImageDoc[]) => {
     const allImages = images ? [...images, ...updatedImages] : updatedImages;
@@ -82,10 +84,8 @@ export default function NapPage() {
 
       // Removing Images Locally
       if (images && images.length > 0) {
-        console.log("updating images");
         const updatedImages = images.filter((img) => img.id !== id);
         setImages(updatedImages);
-        console.log("Updated Images :: ", updatedImages);
       }
     }
     setDeleting(false);
@@ -100,14 +100,16 @@ export default function NapPage() {
       };
 
       const loadImages = async () => {
-        const res = await getAllImages(id);
-        setImages(res);
+        if (user?.uid) {
+          const res = await getAllImages(user.uid, id);
+          setImages(res);
+        }
         setIsLoadingImages(false);
       };
 
       loadNaap().finally(() => loadImages());
     }
-  }, [id]);
+  }, [id, user]);
 
   // Loading state
   if (isLoading) {
@@ -214,8 +216,8 @@ export default function NapPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="w-full max-w-lg bg-card mx-auto px-4 mt-20 mb-10">
-          <div className="rounded-xl border-2 border-red-500 w-full p-6">
+        <div className="w-full max-w-lg mx-auto px-4 mt-20 mb-10">
+          <div className="rounded-xl border-2 bg-card border-red-500 w-full p-6">
             <h4 className="text-lg font-medium text-center text-red-500 mb-6">
               Danger Zone
             </h4>
