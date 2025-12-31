@@ -11,8 +11,8 @@ import { ThemeProvider } from "./_contexts/Theme";
 import Header from "./_components/Header";
 
 export const metadata: Metadata = {
-  title: "Tailor Shop",
-  description: "Tailor Shop App to store the images of the nap",
+  title: "Naap",
+  description: "Naap App to store Customer Info and their Naap Images",
 };
 
 export default function RootLayout({
